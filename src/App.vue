@@ -1,6 +1,18 @@
 <template>
   <ToolBar />
-  <AddNumber v-for="number of numbersArr" :key="number" :addNumber="number" />
+  <AddNumber
+    v-for="card of numberCards"
+    :key="card"
+    :addNumber="card.numberAdd"
+    :showLine="card.showLine"
+  />
+  <div>
+    <button @click="hide(0)">Show/Hide</button>
+    <button @click="hide(1)">Show/Hide</button>
+    <button @click="hide(2)">Show/Hide</button>
+    <button @click="hide(3)">Show/Hide</button>
+    <button @click="hide(4)">Show/Hide</button>
+  </div>
 </template>
 
 <script>
@@ -15,10 +27,35 @@ export default {
   },
   data() {
     return {
-      numbersArr: [5, 15, 30, 60],
+      numberCards: [
+        {
+          numberAdd: 5,
+          showLine: true,
+        },
+        {
+          numberAdd: 15,
+          showLine: true,
+        },
+        {
+          numberAdd: 30,
+          showLine: true,
+        },
+        {
+          numberAdd: 50,
+          showLine: true,
+        },
+        {
+          numberAdd: 100,
+          showLine: true,
+        },
+      ],
     };
   },
-  methods: {},
+  methods: {
+    hide(id) {
+      this.numberCards[id].showLine = !this.numberCards[id].showLine;
+    },
+  },
 };
 </script>
 

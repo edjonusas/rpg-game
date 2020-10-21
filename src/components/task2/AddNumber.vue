@@ -1,6 +1,7 @@
 <template>
   <div class="number">{{ number }}</div>
   <button @click="add">add {{ plus }}</button>
+  <div v-if="showLine" class="line"></div>
 </template>
 
 <script>
@@ -8,9 +9,11 @@ export default {
   name: "AddNumber",
   props: {
     addNumber: Number,
+    showLine: Boolean,
   },
   data() {
     return {
+      boolean: true,
       number: 0,
       plus: this.addNumber,
     };
@@ -24,6 +27,11 @@ export default {
 </script>
 
 <style scoped>
+.line {
+  height: 10px;
+  background-color: steelblue;
+}
+
 .number {
   margin: 10px;
 }
