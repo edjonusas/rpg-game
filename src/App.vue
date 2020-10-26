@@ -1,59 +1,60 @@
 <template>
-  <ToolBar />
-  <AddNumber
-    v-for="card of numberCards"
-    :key="card"
-    :addNumber="card.numberAdd"
-    :showLine="card.showLine"
+  <Start @name="addName" v-if="viewTrigger === 1" />
+  <Game
+    @shop="shop"
+    @add="add"
+    :name="name"
+    :points="points"
+    v-if="viewTrigger === 2"
   />
-  <div>
-    <button @click="hide(0)">Show/Hide</button>
-    <button @click="hide(1)">Show/Hide</button>
-    <button @click="hide(2)">Show/Hide</button>
-    <button @click="hide(3)">Show/Hide</button>
-    <button @click="hide(4)">Show/Hide</button>
-  </div>
+  <Shop
+    @game="game"
+    @click-value="upgradeClick"
+    :points="points"
+    v-if="viewTrigger === 3"
+  />
 </template>
 
 <script>
-import ToolBar from "./components/ToolBar.vue";
-import AddNumber from "./components/task2/AddNumber";
+import Start from "./components/task4/Start";
+import Game from "./components/task4/Game";
+import Shop from "./components/task4/Shop";
 
 export default {
   name: "App",
   components: {
-    ToolBar,
-    AddNumber,
+    Start,
+    Game,
+    Shop,
   },
   data() {
     return {
-      numberCards: [
-        {
-          numberAdd: 5,
-          showLine: true,
-        },
-        {
-          numberAdd: 15,
-          showLine: true,
-        },
-        {
-          numberAdd: 30,
-          showLine: true,
-        },
-        {
-          numberAdd: 50,
-          showLine: true,
-        },
-        {
-          numberAdd: 100,
-          showLine: true,
-        },
-      ],
+      name: "",
+      points: 0,
+      clickValue: 1,
+      viewTrigger: 1,
     };
   },
   methods: {
-    hide(id) {
-      this.numberCards[id].showLine = !this.numberCards[id].showLine;
+    inputData(data) {
+      this.user = data;
+    },
+    addName(data) {
+      this.name = data;
+      this.viewTrigger = 2;
+    },
+    shop(data) {
+      this.viewTrigger = data;
+    },
+    game(data) {
+      this.viewTrigger = data;
+    },
+    add() {
+      this.points += this.clickValue;
+    },
+    upgradeClick(data) {
+      this.clickValue = data.bonus;
+      this.points -= data.points;
     },
   },
 };
