@@ -1,33 +1,34 @@
 <template>
-  <h1>Game</h1>
+  <h1>Challange</h1>
   <h2>{{ name }}</h2>
   <span>Player points: {{ points }}</span>
   <button @click="goTo(3)">To Shop</button>
-  <button @click="goTo(4)">Challange</button>
+  <button @click="goTo(2)">To Game</button>
   <div class="container">
-    <img @click="cookie" :src="img()" alt="cookie" />
+    <img @click="add" :src="img()" alt="cookie" />
   </div>
 </template>
 
 <script>
 export default {
-  name: "Game",
+  name: "Challange",
   props: {
     name: String,
-    points: Number,
     imgNumber: Number,
   },
   data() {
-    return {};
+    return {
+      points: 0,
+    };
   },
   methods: {
     //navigation to shop info
     goTo(data) {
       this.$emit("shop", data);
     },
-    // click on cookie
-    cookie() {
-      this.$emit("add");
+    // click on cookie ads points
+    add() {
+      this.points++;
     },
     //load cookie img
     img() {
@@ -36,6 +37,7 @@ export default {
   },
 };
 </script>
+
 <style scoped>
 .container {
   margin: 250px 0;
@@ -47,9 +49,6 @@ img {
   cursor: pointer;
   width: 256px;
   height: 256px;
-}
-
-img:active {
 }
 
 span {
