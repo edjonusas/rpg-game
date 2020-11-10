@@ -1,86 +1,50 @@
 <template>
-  <Start @name="addName" v-if="viewTrigger === 1" />
-  <Game
-    @shop="goToPage"
-    @add="add"
-    :imgNumber="cookieImg"
-    :name="name"
-    :points="points"
-    v-if="viewTrigger === 2"
-  />
-  <Challange
-    :imgNumber="cookieImg"
-    :name="name"
-    @shop="goToPage"
-    v-if="viewTrigger === 4"
-  />
-  <Shop
-    @game="goToPage"
-    @click-value="upgradeClick"
-    @clicker="addClicker"
-    @change-cookie="changeCookie"
-    :points="points"
-    v-if="viewTrigger === 3"
-  />
+  <div class="main">
+    <div class="money">
+      {{ getMoney }}
+      <span v-if="getError">truksta pinigu</span>
+    </div>
+    <div class="container">
+      <div v-for="item of getItems" :key="item.id" class="card">
+        <img :src="item.image" alt="item" />
+        <h4>{{ item.name }} {{ item.id }}</h4>
+        <span>{{ item.price }}</span>
+        <button @click="buyItem(item.id)">Buy Now</button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
-import Start from "./components/task4/Start";
-import Game from "./components/task4/Game";
-import Challange from "./components/task4/Challange";
-import Shop from "./components/task4/Shop";
-
 export default {
   name: "App",
-  components: {
-    Start,
-    Game,
-    Challange,
-    Shop,
-  },
+  components: {},
   data() {
     return {
-      name: "",
-      points: 0,
-      clickValue: 100,
-      viewTrigger: 1,
-      cookieImg: 1,
+      personDataArr: [],
+      personCount: {},
+      sideBlockState: false,
     };
   },
+  computed: {
+    getItems() {
+      return this.$store.getters.getItems;
+    },
+    getMoney() {
+      return this.$store.getters.getMoney;
+    },
+    getError() {
+      return this.$store.getters.getError;
+    },
+  },
+  watch: {},
   methods: {
-    // add player name and go to game
-    addName(data) {
-      this.name = data;
-      this.viewTrigger = 2;
+    jokes() {
+      this.$store.dispatch("getJoke");
     },
-    // go to Shop / Game page
-    goToPage(data) {
-      this.viewTrigger = data;
-    },
-    // add points
-    add() {
-      this.points += this.clickValue;
-    },
-    // buy and update click value
-    upgradeClick(data) {
-      this.clickValue = data.bonus;
-      this.points -= data.points;
-    },
-    // add point every second
-    addClicker(data) {
-      this.points -= data.points;
-      setInterval(() => {
-        this.points++;
-      }, 1000);
-    },
-    // img number generator
-    changeCookie(data) {
-      this.points -= data.points;
-      if (this.cookieImg < 3) {
-        this.cookieImg++;
-      } else {
-        this.cookieImg = 1;
-      }
+
+    buyItem(id) {
+      this.$store.commit("buyItem", id);
     },
   },
 };
@@ -98,19 +62,20 @@ body {
   text-align: center;
   color: #2c3e50;
 }
-
-button {
-  margin: 0 5px;
-  font-weight: 700;
-  padding: 10px 15px;
-  border: none;
-  border-radius: 4px;
-  background-color: cadetblue;
-  color: #fff;
+img {
+  width: 300px;
+}
+.container {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
 }
 
-button:disabled {
-  background-color: #899595;
-  color: #b6b6b6;
+.card {
+  width: 300px;
+  background-color: #d8d8d8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 </style>
