@@ -10,7 +10,10 @@ const store = createStore({
         img: require("@/assets/heroes/hero2.jpg"),
         health: 100,
         fullHealth: 100,
+        mana: 100,
+        fullMana: 100,
         maxDamage: 10,
+        critical: 1,
       },
       playerPortrait: [
         { img: require("@/assets/heroes/hero1.jpg"), id: 0, select: false },
@@ -69,15 +72,69 @@ const store = createStore({
           active: false,
         },
       ],
-      item: {
-        id: 0,
-        goldMsg: false,
-        price: 50,
-        item: "health potion",
-        img: require("@/assets/weapons/potion.png"),
-        info:
-          "can be bought from shop for 50 coins, recovers player health when bought",
-      },
+      spells: [
+        {
+          id: 0,
+          name: "Heal",
+          img: require("@/assets/spells/heal.png"),
+          effect:
+            "Heals player randomly from 10 to 50 points, cost 25 mana points",
+          active: false,
+          magicDuration: 0,
+          mana: 25,
+        },
+        {
+          id: 1,
+          name: "Fire Ball",
+          img: require("@/assets/spells/fireball.png"),
+          effect:
+            "Do damage to enemy: does damage from 0 to 35, costs 30 mana points",
+          active: false,
+          magicDuration: 0,
+          mana: 30,
+        },
+        {
+          id: 2,
+          name: "Dmg Buff",
+          img: require("@/assets/spells/critical.png"),
+          effect:
+            "adds 15% critical chance for every user hit for 10 moves (dmg X3), cost 50mana points",
+          active: false,
+          magicDuration: 0,
+          mana: 50,
+        },
+        {
+          id: 3,
+          name: "Summon",
+          img: require("@/assets/spells/summon.png"),
+          effect:
+            "Summons companion, which takes damage and does random damage (0-10) to enemy for 5 rounds",
+          active: false,
+          magicDuration: 0,
+          mana: 50,
+        },
+      ],
+
+      items: [
+        {
+          id: 0,
+          goldMsg: false,
+          price: 50,
+          item: "health potion",
+          img: require("@/assets/weapons/potion.png"),
+          info:
+            "can be bought from shop for 50 coins, recovers player health when bought",
+        },
+        {
+          id: 1,
+          goldMsg: false,
+          price: 50,
+          item: "Mana potion",
+          img: require("@/assets/weapons/potion2.png"),
+          info:
+            "can be bought from shop for 50 coins, recovers player health when bought",
+        },
+      ],
     };
   },
   getters: {
@@ -86,7 +143,8 @@ const store = createStore({
     monsters: (state) => state.monsters,
     monsterCounter: (state) => state.monsterCounter,
     weapons: (state) => state.weapons,
-    item: (state) => state.item,
+    spells: (state) => state.spells,
+    items: (state) => state.items,
     player: (state) => state.player,
     monsterHealth: (state) => state.monsters[state.monsterCounter].health,
     playerHealth: (state) => state.player.health,
@@ -116,14 +174,99 @@ const store = createStore({
       state.player.maxDamage = state.weapons[id].damage;
     },
 
+    useSpell: (state, id) => {
+      function randomValue(min, max) {
+        return Math.floor(Math.random() * (max - min)) + min;
+      }
+      //health spell
+      if (id === 0 && state.spells[id].mana <= state.player.mana) {
+        state.player.mana -= state.spells[id].mana;
+        state.spells.map((spell) => (spell.active = false));
+        state.spells[id].active = true;
+        state.player.health += randomValue(10, 50);
+        setTimeout(function() {
+          state.spells[id].active = false;
+        }, 1000);
+        if (state.player.health > state.player.fullHealth) {
+          state.player.health = state.player.fullHealth;
+        }
+        state.player.health -= randomValue(
+          1,
+          state.monsters[state.monsterCounter].maxDamage
+        );
+      }
+      //Fire ball
+      if (id === 1 && state.spells[id].mana <= state.player.mana) {
+        state.player.mana -= state.spells[id].mana;
+        state.spells.map((spell) => (spell.active = false));
+        state.spells[id].active = true;
+        state.monsters[state.monsterCounter].health -= randomValue(1, 35);
+        state.player.gold += randomValue(0, 10);
+        setTimeout(function() {
+          state.spells[id].active = false;
+        }, 1000);
+        state.player.health -= randomValue(
+          1,
+          state.monsters[state.monsterCounter].maxDamage
+        );
+      }
+      //Dmg Buff
+      if (id === 2 && state.spells[id].mana <= state.player.mana) {
+        state.player.mana -= state.spells[id].mana;
+        state.spells.map((spell) => (spell.active = false));
+        state.spells[id].active = true;
+        state.spells[id].magicDuration = 10;
+        state.player.health -= randomValue(
+          1,
+          state.monsters[state.monsterCounter].maxDamage
+        );
+      }
+      //Summon
+      if (id === 3 && state.spells[id].mana <= state.player.mana) {
+        state.player.mana -= state.spells[id].mana;
+        state.spells.map((spell) => (spell.active = false));
+        state.spells[id].active = true;
+        state.spells[id].magicDuration = 5;
+        state.player.health -= randomValue(
+          1,
+          state.monsters[state.monsterCounter].maxDamage
+        );
+      }
+    },
+
     playerAttack: (state, id) => {
       function randomValue(min, max) {
         return Math.floor(Math.random() * (max - min)) + min;
       }
+      state.player.critical = 1;
 
       if (state.monsters[id].health > 0 && state.player.health > 0) {
+        //summon attack
+        if (state.spells[3].active === true) {
+          console.log("summon hit");
+          state.monsters[state.monsterCounter].health -= randomValue(1, 10);
+          state.spells[3].magicDuration--;
+          if (state.spells[3].magicDuration === 0) {
+            state.spells[3].active = false;
+          }
+        }
+        //"adds 15% critical chance for every user hit for 10 moves (dmg X3), cost 50mana points",
+        if (state.spells[2].active === true) {
+          state.spells[2].magicDuration--;
+          if (state.spells[2].magicDuration === 0) {
+            state.spells[2].active = false;
+          }
+          if (randomValue(1, 7) === 1) {
+            state.player.critical = 3;
+            console.log("critical hit jeeeeeee");
+          }
+        }
         // player Attack
-        state.monsters[id].health -= randomValue(1, state.player.maxDamage);
+
+        state.monsters[id].health -= randomValue(
+          1 * state.player.critical,
+          state.player.maxDamage * state.player.critical
+        );
         state.weapons.map((weapon) => {
           if (weapon.active === true) {
             //weapon sword
@@ -159,8 +302,8 @@ const store = createStore({
               if (secondHit === 1) {
                 console.log("second hit");
                 state.monsters[id].health -= randomValue(
-                  1,
-                  state.player.maxDamage
+                  1 * state.player.critical,
+                  state.player.maxDamage * state.player.critical
                 );
               }
               state.player.health -= randomValue(
@@ -186,11 +329,26 @@ const store = createStore({
     },
 
     usePotion: (state) => {
-      if (state.player.gold >= state.item.price) {
-        state.player.gold -= state.item.price;
+      if (state.player.gold >= state.items[0].price) {
+        state.player.gold -= state.items[0].price;
         state.player.health = state.player.fullHealth;
       } else {
         state.item.goldMsg = true;
+        setTimeout(function() {
+          state.items[0].goldMsg = false;
+        }, 1000);
+      }
+    },
+
+    useMana: (state) => {
+      if (state.player.gold >= state.items[1].price) {
+        state.player.gold -= state.items[1].price;
+        state.player.mana = state.player.fullMana;
+      } else {
+        state.items[1].goldMsg = true;
+        setTimeout(function() {
+          state.items[1].goldMsg = false;
+        }, 1000);
       }
     },
 

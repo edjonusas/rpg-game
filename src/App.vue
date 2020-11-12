@@ -31,14 +31,21 @@
     </header>
     <main>
       <div>
-        <PlayerCard :player="player" :weapons="weapons" />
+        <PlayerCard :player="player" :weapons="weapons" :spells="spells" />
         <div><button @click="attack(monsterCounter)">Attack!</button></div>
         <MonsterCard :monster="monsters[monsterCounter]" />
       </div>
       <div class="item-container">
-        <h3>Health Potion 50 gold</h3>
-        <img @click="usePotion" :src="item.img" :alt="item.item" />
-        <span class="msg" v-if="item.goldMsg">Not Enough Gold!!!</span>
+        <div>
+          <h4>Health Potion 50 gold</h4>
+          <img @click="usePotion" :src="items[0].img" :alt="items[0].item" />
+          <span class="msg" v-if="items[0].goldMsg">Not Enough Gold!!!</span>
+        </div>
+        <div>
+          <h4>Mana Potion 50 gold</h4>
+          <img @click="useMana" :src="items[1].img" :alt="items[1].item" />
+          <span class="msg" v-if="items[1].goldMsg">Not Enough Gold!!!</span>
+        </div>
       </div>
     </main>
   </div>
@@ -90,11 +97,14 @@ export default {
     playerHealth() {
       return this.$store.getters.playerHealth;
     },
-    item() {
-      return this.$store.getters.item;
+    items() {
+      return this.$store.getters.items;
     },
     weapons() {
       return this.$store.getters.weapons;
+    },
+    spells() {
+      return this.$store.getters.spells;
     },
     player() {
       return this.$store.getters.player;
@@ -114,11 +124,21 @@ export default {
     //DONE on every hit player gets random amount of coins - from 0 to 10
     //DONE coins are needed to buy health potions, one potion costs 50 points
     //DONE health potions fully restores player health when bought
+
+    //DONE Add mana and skills to your game
+    //DONE user will have mana bar with 100 mana points
+    //DONE mana is subtracted with cost of skill when skill is called
+    //DONE create these skills
+    //DONE heal: heals player randomly from 10 to 50 points, cost 25 mana points
+    //DONE do damage to enemy: does damage from 0 to 35, costs 30 mana points
+    //DONE buff: adds 15% critical chance for every user hit for 10 moves (dmg X3), cost 50mana points
+    //DONE summon: summons companion, which takes damage and does random damage (0-10) to enemy for 5 rounds
+    //DONE add mana potion too
     selectHero(id) {
       this.$store.commit("selectChar", id);
-      this.$store.commit("submitName", this.playerName);
     },
     start() {
+      this.$store.commit("submitName", this.playerName);
       this.gameState = true;
     },
     attack(id) {
@@ -126,6 +146,9 @@ export default {
     },
     usePotion() {
       this.$store.commit("usePotion");
+    },
+    useMana() {
+      this.$store.commit("useMana");
     },
   },
 };
@@ -243,8 +266,13 @@ button {
 .item-container {
   color: #dddddd;
   display: flex;
-  flex-direction: column;
-  align-items: center;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.item-container div {
+  margin: 0 10px;
+  text-align: center;
 }
 
 .item-container img {
